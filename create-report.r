@@ -6,16 +6,19 @@ library(testthat)
 
 # Import the data set and massage it into a nice table.
 
-inputfiles <- Sys.glob("data/*/*/*/*.csv")
+inputfiles <- Sys.glob("data/*/*/*/*/*.csv")
 builds <- foreach(file = inputfiles, .combine=rbind, .multicombine=TRUE, .inorder=FALSE) %do% {
     seg <- strsplit(file, "/", fixed=TRUE)[[1]]
     expect_equal(seg[1], "data")
-    system <- seg[2]
-    compiler <- seg[3]
-    build.id <- sub("^([a-z0-9]+)-(haskell-)?(.*)$", "\\1", seg[4])
-    package <- sub("^([a-z0-9]+)-(haskell-)?(.*)$", "\\3", seg[4])
-    machine <- sub("^(.+)-id\\.csv$", "\\1", seg[5])
+    config <- seg[2]
+    expect_true(config %in% c("default","single-threaded"))
+    system <- seg[3]
+    compiler <- seg[4]
+    build.id <- sub("^([a-z0-9]+)-(haskell-)?(.*)$", "\\1", seg[5])
+    package <- sub("^([a-z0-9]+)-(haskell-)?(.*)$", "\\3", seg[5])
+    machine <- sub("^(.+)-id\\.csv$", "\\1", seg[6])
     t <- as.data.table(read.csv(file, stringsAsFactors=FALSE))
+    t$config <- config
     t$system <- system
     t$build.id <- build.id
     t$package <- package
@@ -45,7 +48,7 @@ build.hashes <- unique(builds$build.id)
 expect_equal(length(build.types), length(build.hashes))
 
 # The tuple (machine, iteration) must be unique per build type.
-expect_false(any(duplicated(builds, by=c("build.id","machine","iteration"))))
+expect_false(any(duplicated(builds, by=c("config","build.id","machine","iteration"))))
 
 # Drop fields we don't need and clean up the table.
 builds$out <- NULL
@@ -53,10 +56,10 @@ builds$build.id <- NULL
 builds$iteration <- NULL
 setkey(builds, ghc, package, system, machine)
 
-# Determine the library ID would expect per build type. The notion of an
-# "expected id" is a little flaky, because we don't know what to expect,
-# so we simply interpret the id that occurs strictly more often than any
-# other as the "correct" one.
+# Determine the expected library ID per build type. The notion of an
+# "expected id" is a little flaky, because in all honesty we don't know
+# what to expect. So we simply interpret the id that occurs strictly
+# more often than any other as the "correct" one.
 
 most_common_id <- function(libids) {
     expect_more_than(length(libids), 0)
@@ -66,21 +69,35 @@ most_common_id <- function(libids) {
     t[[1,1]]
 }
 
-t <- unique(builds[,list(expected=most_common_id(libraryid)),by=list(ghc,package,system)])
-builds <- merge(builds, t, by=c("ghc","package","system"), all=TRUE)
+# Assign every build the ID we would have expected, where the expected ID is
+# assumed to depend on the configuration, the package, the system, and the
+# version of GHC. Note that this convention makes sense from a rational point
+# of view, but in fact the expected ID (a.k.a. the ID generated most
+# frequently) varies between machines! Looking at the set of all builds, an ID
+# 'x' may be the most frequent one, but it happens that build machines to never
+# generate 'x' in 100 builds and more. What to make of this? Those IDs are
+# truely non-determinstic.
+t <- unique(builds[,list(expected=most_common_id(libraryid)),by=list(config,ghc,package,system)])
+builds <- merge(builds, t, by=c("config","ghc","package","system"), all=TRUE)
 builds[,correct := libraryid==expected]
 
-# How to print a summary
+# Print summaries
 
 print_summary <- function(heading, summary) {
-    cat(paste("### Summary", heading, "\n\n"))
+    cat(paste("####", heading, "\n\n"))
     summary[,"%" := round(correct/builds*100, 1)]
     cat("~~~~~~~~~~\n")
-    print(summary)
+    print(summary[order(correct / builds, decreasing=TRUE)])
     cat("~~~~~~~~~~\n\n")
 }
 
-print_summary("for GHC 7.10.1", builds[ghc=="7.10.1",list(builds=length(correct),correct=sum(correct))])
-print_summary("for GHC 7.10.1 by package", builds[ghc=="7.10.1",list(builds=length(correct),correct=sum(correct)),by=package])
-print_summary("for GHC 7.10.1 by package and system", builds[ghc=="7.10.1",list(builds=length(correct),correct=sum(correct)),by=list(package,system)])
-print_summary("for GHC 7.10.1 by package, system, and build machine", builds[ghc=="7.10.1",list(builds=length(correct),correct=sum(correct)),by=list(package,system,machine)])
+print_configuration <- function(heading, builds) {
+    cat(paste("###", heading, "\n\n"))
+    print_summary("Summary", builds[,list(builds=length(correct),correct=sum(correct))])
+    print_summary("Summary by package", builds[,list(builds=length(correct),correct=sum(correct)),by=package])
+    print_summary("Summary by package and system", builds[,list(builds=length(correct),correct=sum(correct)),by=list(package,system)])
+    # print_summary("Summary by package, system, and build machine", builds[,list(builds=length(correct),correct=sum(correct)),by=list(package,system,machine)])
+}
+
+print_configuration("Multi-threading Configuration with GHC 7.10.1", builds[config=="default" & ghc=="7.10.1"])
+print_configuration("Single-threaded Configuration with GHC 7.10.1", builds[config=="single-threaded" & ghc=="7.10.1"])
