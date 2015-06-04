@@ -1,6 +1,16 @@
-{ nixpkgs ? import <nixpkgs> {}, iterations ? 5, compiler ? "ghc7101", hostname, pkg }:
+{ iterations ? 25, compiler ? "ghc7101", hostname, pkg }:
 
-with nixpkgs.pkgs;
+let
+
+  nixpkgs = (import <nixpkgs> {}).pkgs.fetchgit {
+              url = "https://github.com/nixos/nixpkgs-channels";
+              rev = "f93a8ee1105f4cc3770ce339a8c1a4acea3b2fb6";
+              sha256 = "01fnyw711p6kf9qpdabys9im10hlih1l1pxwp06wkq7b9wsljawd";
+            };
+
+in
+
+with import nixpkgs {};
 
 let
 
