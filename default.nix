@@ -22,23 +22,28 @@ let
 
   ghc = iteration: haskell.packages.${compiler}.ghcWithPackages (p: lib.singleton (build iteration p));
 
-  builder = i: '' echo -n '${ghc i},${toString i},' >>$fout
+  builder = i: ''
+                  echo -n '${ghc i},${toString i},' >>$fout
                   ${ghc i}/bin/ghc-pkg --simple-output field ${pkg} id >>$fout
                '';
 
 in
 
+# TODO: Greater values won't work. Nix runs into a bash size limit
+#       trying to creat the build script.
+assert iterations <= 700;
+
 stdenv.mkDerivation {
 
   name = "haskell-library-id-challenge-${hostname}-0";
 
-  phases = ["installPhase"];
-
-  installPhase = ''
-    mkdir -p $out
-    pkg=$(basename ${haskell.packages.${compiler}.${pkg}})
-    fout="$out/${system}-${compiler}-$pkg-${hostname}-id.csv"
-    echo >$fout 'storepath,iteration,libraryid'
-  '' + lib.concatStringsSep "\n" (map builder (lib.range 1 iterations));
+  buildCommand = writeScript "collect-ids" (''
+              #! ${stdenv.shell}
+              export PATH=${coreutils}/bin
+              mkdir -p $out
+              pkg=$(basename ${haskell.packages.${compiler}.${pkg}})
+              fout="$out/${system}-${compiler}-$pkg-${hostname}-id.csv"
+              echo >$fout 'storepath,iteration,libraryid'
+            '' + lib.concatStrings (map builder (lib.range 1 iterations)));
 
 }
