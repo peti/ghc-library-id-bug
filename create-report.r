@@ -1,4 +1,4 @@
-# create-workspace.r
+# create-report.r
 
 library(data.table)
 library(foreach)
@@ -11,7 +11,7 @@ builds <- foreach(file = inputfiles, .combine=rbind, .multicombine=TRUE, .inorde
     seg <- strsplit(file, "/", fixed=TRUE)[[1]]
     expect_equal(seg[1], "data")
     config <- seg[2]
-    expect_true(config %in% c("default","single-threaded"))
+    expect_true(config %in% c("multi-threaded","single-threaded"))
     system <- seg[3]
     compiler <- seg[4]
     build.id <- sub("^([a-z0-9]+)-(haskell-)?(.*)$", "\\1", seg[5])
@@ -54,7 +54,7 @@ expect_false(any(duplicated(builds, by=c("config","build.id","machine","iteratio
 builds$out <- NULL
 builds$build.id <- NULL
 builds$iteration <- NULL
-setkey(builds, ghc, package, system, machine)
+setkey(builds, config, ghc, package, system, machine)
 
 # Determine the expected library ID per build type. The notion of an
 # "expected id" is a little flaky, because in all honesty we don't know
@@ -84,20 +84,14 @@ builds[,correct := libraryid==expected]
 # Print summaries
 
 print_summary <- function(heading, summary) {
-    cat(paste("####", heading, "\n\n"))
+    cat(paste("###", heading, "\n\n"))
     summary[,"%" := round(correct/builds*100, 1)]
     cat("~~~~~~~~~~\n")
     print(summary[order(correct / builds, decreasing=TRUE)])
     cat("~~~~~~~~~~\n\n")
 }
 
-print_configuration <- function(heading, builds) {
-    cat(paste("###", heading, "\n\n"))
-    print_summary("Summary", builds[,list(builds=length(correct),correct=sum(correct))])
-    print_summary("Summary by package", builds[,list(builds=length(correct),correct=sum(correct)),by=package])
-    print_summary("Summary by package and system", builds[,list(builds=length(correct),correct=sum(correct)),by=list(package,system)])
-    # print_summary("Summary by package, system, and build machine", builds[,list(builds=length(correct),correct=sum(correct)),by=list(package,system,machine)])
-}
-
-print_configuration("Multi-threading Configuration with GHC 7.10.1", builds[config=="default" & ghc=="7.10.1"])
-print_configuration("Single-threaded Configuration with GHC 7.10.1", builds[config=="single-threaded" & ghc=="7.10.1"])
+print_summary("Summary", builds[ghc=="7.10.1",list(builds=length(correct),correct=sum(correct)),by=config])
+print_summary("Summary by package", builds[,list(builds=length(correct),correct=sum(correct)),by=list(config,package)])
+print_summary("Summary by package and system", builds[,list(builds=length(correct),correct=sum(correct)),by=list(config,package,system)])
+print_summary("Summary by package and build machine", builds[,list(builds=length(correct),ids=length(unique(libraryid)),correct=sum(correct)),by=list(package,machine,config)])
