@@ -43,7 +43,7 @@ Generate the following data by running:
 ~~~~~~~~~~
             config builds correct    %
 1: single-threaded   3660    3625 99.0
-2:  multi-threaded   1675    1260 75.2
+2:  multi-threaded   1725    1295 75.1
 ~~~~~~~~~~
 
 ### Summary by package
@@ -53,8 +53,8 @@ Generate the following data by running:
 1:  multi-threaded     mtl-2.2.1    700     700 100.0
 2: single-threaded  text-1.2.0.4   1580    1570  99.4
 3: single-threaded aeson-0.8.1.0   2080    2055  98.8
-4:  multi-threaded  text-1.2.0.4    625     565  90.4
-5:  multi-threaded aeson-0.8.1.0    450      95  21.1
+4:  multi-threaded  text-1.2.0.4    650     583  89.7
+5:  multi-threaded aeson-0.8.1.0    475     112  23.6
 ~~~~~~~~~~
 
 ### Summary by package and system
@@ -64,9 +64,9 @@ Generate the following data by running:
 1:  multi-threaded     mtl-2.2.1  x86_64-linux    700     700 100.0
 2: single-threaded  text-1.2.0.4  x86_64-linux   1580    1570  99.4
 3: single-threaded aeson-0.8.1.0  x86_64-linux   2080    2055  98.8
-4:  multi-threaded  text-1.2.0.4  x86_64-linux    400     365  91.2
+4:  multi-threaded  text-1.2.0.4  x86_64-linux    425     383  90.1
 5:  multi-threaded  text-1.2.0.4 x86_64-darwin    225     200  88.9
-6:  multi-threaded aeson-0.8.1.0  x86_64-linux    350      78  22.3
+6:  multi-threaded aeson-0.8.1.0  x86_64-linux    375      95  25.3
 7:  multi-threaded aeson-0.8.1.0 x86_64-darwin    100      17  17.0
 ~~~~~~~~~~
 
@@ -107,13 +107,15 @@ Generate the following data by running:
 31:  text-1.2.0.4                  abbradar.net  multi-threaded    100   2      89  89.0
 32:  text-1.2.0.4                   mango.local  multi-threaded    100   2      81  81.0
 33:  text-1.2.0.4                mono.rycee.net  multi-threaded     25   2      20  80.0
-34: aeson-0.8.1.0                  work.cryp.to  multi-threaded    100  35      58  58.0
-35:  text-1.2.0.4    blackburne.lancelotsix.com  multi-threaded     25   2      14  56.0
-36: aeson-0.8.1.0                mono.rycee.net  multi-threaded     25  17       9  36.0
-37: aeson-0.8.1.0                   mango.local  multi-threaded    100  71      17  17.0
-38: aeson-0.8.1.0                 leroy.geek.nz  multi-threaded    100  78       6   6.0
-39: aeson-0.8.1.0                  abbradar.net  multi-threaded    100  78       5   5.0
-40: aeson-0.8.1.0                mobile.cryp.to  multi-threaded     25  20       0   0.0
-41: aeson-0.8.1.0                c-cube.bennofs single-threaded     25   1       0   0.0
+34:  text-1.2.0.4                       tornado  multi-threaded     25   2      18  72.0
+35: aeson-0.8.1.0                       tornado  multi-threaded     25   9      17  68.0
+36: aeson-0.8.1.0                  work.cryp.to  multi-threaded    100  35      58  58.0
+37:  text-1.2.0.4    blackburne.lancelotsix.com  multi-threaded     25   2      14  56.0
+38: aeson-0.8.1.0                mono.rycee.net  multi-threaded     25  17       9  36.0
+39: aeson-0.8.1.0                   mango.local  multi-threaded    100  71      17  17.0
+40: aeson-0.8.1.0                 leroy.geek.nz  multi-threaded    100  78       6   6.0
+41: aeson-0.8.1.0                  abbradar.net  multi-threaded    100  78       5   5.0
+42: aeson-0.8.1.0                mobile.cryp.to  multi-threaded     25  20       0   0.0
+43: aeson-0.8.1.0                c-cube.bennofs single-threaded     25   1       0   0.0
           package                       machine          config builds ids correct     %
 ~~~~~~~~~~
