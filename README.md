@@ -4,7 +4,7 @@
 
 Please help us to acquire some hard data about the frequency with which
 [GHC 7.10.x assigns different library IDs to the same
-build](https://ghc.haskell.org/trac/ghc/ticket/4012). You can contribute
+build](https://ghc.haskell.org/trac/ghc/ticket/4012) ([more details](https://mail.haskell.org/pipermail/ghc-devs/2015-September/009964.html)). You can contribute
 as follows:
 
 1. Clone this repository:
