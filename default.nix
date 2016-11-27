@@ -30,7 +30,7 @@ let
 in
 
 # TODO: Greater values won't work. Nix runs into a bash size limit
-#       trying to creat the build script.
+#       trying to create the build script.
 assert iterations <= 700;
 
 stdenv.mkDerivation {
